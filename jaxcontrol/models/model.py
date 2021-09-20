@@ -33,3 +33,17 @@ class Model(ABC):
         f = lambda b: self.forward(x,b)
         bb = jacfwd(f)(u)
         return bb
+
+#discrete linear model
+class LinearModel:
+    def __init__(self, A,B):
+        self.A = A
+        self.B = B
+    def forward(self,x,u):
+        return self.A.dot(x) + self.B.dot(u)
+
+class ContLinearModel(LinearModel):
+    def __init__(self, A,B,max_squaring = 16,discritization_time = 0.001):
+        self.dt = discritization_time
+
+
