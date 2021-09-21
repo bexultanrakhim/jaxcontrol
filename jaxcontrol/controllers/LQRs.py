@@ -1,16 +1,17 @@
 from .controller import Controller
 import jax.numpy as jnp
-from jaxcontrol.models import Model
+from jaxcontrol.models import Model, LinearModel
 from typing import Type, Tuple
 
 class LQR(Controller):
     def __init__(self,
-                A: Type[jnp.array],
-                B: Type[jnp.array],
+                model: Type[LinearModel],
                 Q: Type[jnp.array],
                 R: Type[jnp.array],
                 N = 'inf'):
         super().__init__()
+        A = model.A
+        B = model.B
         #check if A,B,Q,R have appropriate dimensions
         if N<=0:
             raise ValueError("N can not be negative")
@@ -36,9 +37,6 @@ class LQR(Controller):
     def solve(self, x : Type[jnp.array])->Type[jnp.array]:
         return self.lqr.solve(x)
 
-
-
-
 class LQRN(Controller):
     def __init__(self, A, B, Q, R, N):
         super().__init__()
@@ -62,7 +60,6 @@ class LQRN(Controller):
             u[n] = self.K[n].dot(x[n])
             x[n+1] = self.A.dot(x[n]) + self.B.dot(u[n])
         return (jnp.array(x), jnp.array(u))
-
 
 class LQRInf(Controller):
     def __init__(self, A, B, Q, R):
