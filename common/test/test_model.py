@@ -3,6 +3,7 @@ sys.path.append("../jaxcontrol")
 from jaxcontrol.numeric.integrators import Euler
 from jaxcontrol.models import Pendulum
 import jax.numpy as jnp
+
 ind = Euler()
 mod = Pendulum(ind,L=1.0)
 x0 = jnp.array([0.0,0.0])

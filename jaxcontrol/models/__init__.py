@@ -1,2 +1,2 @@
-from .model import *
-from .pendulum import *
+from .model import Model
+from .pendulum import Pendulum
