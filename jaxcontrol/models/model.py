@@ -45,5 +45,3 @@ class LinearModel:
 class ContLinearModel(LinearModel):
     def __init__(self, A,B,max_squaring = 16,discritization_time = 0.001):
         self.dt = discritization_time
-
-

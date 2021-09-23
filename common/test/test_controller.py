@@ -5,16 +5,17 @@ from jaxcontrol.models import LinearModel
 from jaxcontrol.controllers import LQR
 import jax.numpy as jnp
 ind = Euler()
-A = jnp.array([[1,2],[-3,1]])
-B = jnp.array([[1],[1]])
+A = jnp.array([[0,0],[0.5,0]])
+B = jnp.array([[0.5],[0]])
 model = LinearModel(A,B)
-Q  = jnp.array([[10,0],[0,1]])
+Q  = jnp.array([[0,0],[0,1]])
 R = jnp.array([[1]])
 
-lqr = LQR(model,Q,R,10)
+lqr = LQR(model,Q,R)
 
 x0 = jnp.array([10,1])
 
+print(lqr.lqr.K)
 (x,u) = lqr.solve(x0)
 
 print(x)
