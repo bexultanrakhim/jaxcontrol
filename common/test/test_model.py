@@ -1,10 +1,10 @@
 import sys
 sys.path.append("../jaxcontrol")
 from jaxcontrol.numeric.integrators import Euler
-from jaxcontrol.models import Pendulum
+from jaxcontrol.models import SingleLinkPendulum
 import jax.numpy as jnp
 ind = Euler()
-mod = Pendulum(ind,L=1.0)
+mod = SingleLinkPendulum(ind,L=1.0)
 x0 = jnp.array([0.0,0.0])
 u0 = jnp.array([0.0])
 print(mod.forward(x0,u0))
