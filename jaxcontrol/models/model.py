@@ -6,7 +6,7 @@ from typing import Type
 from jaxcontrol.numeric import integrators as int
 
 class Model(ABC):
-    def __init__(self, integrator: Type[int.Integrator]):
+    def __init__(self, integrator: Type[int.Integrator] = None):
         '''This is a dynamic system model abstact class,
          all models should be extend this class if you want to have utilize properties of this class
         '''
@@ -33,6 +33,12 @@ class Model(ABC):
         f = lambda b: self.forward(x,b)
         bb = jacfwd(f)(u)
         return bb
+
+
+class DiscreteModel(Model):
+    def forward(self,x,u):
+        return self.model(x,u)
+
 
 #discrete linear model
 class LinearModel:
