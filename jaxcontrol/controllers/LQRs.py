@@ -1,8 +1,9 @@
 from .controller import Controller
 import jax.numpy as jnp
+from jax import jit, jacfwd, grad
 from jaxcontrol.models import Model, LinearModel
 from typing import Type, Tuple
-
+from jaxcontrol.numeric.ricatti_solver import RicattiSolver, IterativeDARE
 class LQR(Controller):
     def __init__(self,
                 model: Type[LinearModel],
@@ -30,7 +31,8 @@ class LQR(Controller):
             raise ValueError("matrix R should be of same size as number of inputs and square MxM")
 
         if N == 'inf':
-            self.lqr = LQRInf(A,B,Q,R)
+            dare = IterativeDARE()
+            self.lqr = LQRInf(dare,A,B,Q,R)
         else:
             self.lqr = LQRN(A,B,Q,R,N)
 
@@ -62,29 +64,11 @@ class LQRN(Controller):
         return (jnp.array(x), jnp.array(u))
 
 class LQRInf(Controller):
-    def __init__(self, A, B, Q, G, maxiter = 30, tolerance = 1e-8):
+    def __init__(self,ricattiSolver : Type[RicattiSolver],A, B, Q, G):
         self.A = A
         self.B = B
-        self.Q = Q
-        self.G = G
         # initialize
-        R = B.dot(jnp.linalg.inv(G)).dot(B.T)
-        L_q = self.__cholesky(Q)
-        R_q = jnp.eye(Q.shape[0]) + L_q.T.dot(R).dot(L_q)
-        L_q_bar = self.__cholesky(R_q)
-        Y_bar = jnp.linalg.solve(L_q_bar, L_q)
-        Y = Y_bar.T.dot(Y_bar)
-        X = None
-        for k in range(maxiter):
-            X_prev =X
-            X = A.T.dot(Y).dot(A) + Q
-            if k!=0 and self.__norm(X - X_prev) < tolerance:
-                break
-            L_q = self.__cholesky(X)
-            R_q = jnp.eye(Q.shape[0]) + L_q.T.dot(R).dot(L_q)
-            Y_bar = jnp.linalg.solve(L_q, Y)
-            Y = 2*Y - Y_bar.T.dot(R_q).dot(Y_bar)
-        print(X)
+        X = ricattiSolver.solve(A,B,Q,G)
         self.K = - jnp.linalg.inv((G + B.T.dot(X).dot(B))).dot(B.T).dot(X).dot(A)
 
     def solve(self, x : Type[jnp.array])->Type[jnp.array]:
@@ -92,12 +76,44 @@ class LQRInf(Controller):
         x_next = self.A.dot(x) + self.B.dot(u)
         return (x_next, u)
 
-    def __norm(self,X):
-        return jnp.linalg.norm(X, ord = jnp.inf)
 
-    def __cholesky(self,X):
-        for i in range(X.shape[0]):
-            if X[i,i] == 0:
-                X = X + 1e-8*jnp.eye(X.shape[0])
-                break
-        return jnp.linalg.cholesky(X)
+class iLQR(Controller):
+    def __init__(self,
+                model: Type[Model],
+                stage_cost,
+                final_cost,
+                N,
+                regularization):
+        super().__init__()
+        self.__model = model
+        self.__f_x = model.A
+        self.__f_u = model.B
+        self.__N = N
+        self.__regularization = regularization
+        self.__l_x = jit(grad(stage_cost, argnums = 0))
+        self.__l_u = jit(grad(stage_cost, argnums = 1))
+        self.__l_xx = jit(jacfwd(self.__l_x, argnums = 0))
+        self.__l_uu = jit(jacfwd(self.__l_u, argnums = 1))
+        self.__l_ux = jit(jacfwd(self.__l_u, argnums = 0))
+
+        self.__l_x_F = jit(grad(final_cost, argnums = 0))
+        self.__l_xx_F = jit(jacfwd(self.__l_x_F, argnums = 0))
+
+    def __forward():
+        pass
+
+    def __backward():
+        pass
+
+    def __Q_terms():
+        pass
+
+    def __V_term():
+        pass
+
+    def __E_cost_reduction():
+        pass
+
+
+    def solve(self, x0 : Type[jnp.array])->Type[jnp.array]:
+        pass
