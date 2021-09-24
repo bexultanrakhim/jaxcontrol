@@ -13,7 +13,7 @@ R = jnp.array([[1]])
 
 lqr = LQR(model,Q,R)
 
-x0 = jnp.array([10,1])
+x0 = jnp.array([0,0])
 
 print(lqr.lqr.K)
 (x,u) = lqr.solve(x0)
