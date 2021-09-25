@@ -6,12 +6,14 @@ from typing import Type
 from jaxcontrol.numeric import integrators as int
 
 class Model(ABC):
+    u_dim = 0
+    x_dim = 0
     def __init__(self, integrator: Type[int.Integrator] = None):
         '''This is a dynamic system model abstact class,
          all models should be extend this class if you want to have utilize properties of this class
         '''
         #create the A and B during object creation, using jit this way will
-        #accelerate computation. Normally, it should be on microseconds for model with states less than 10
+        #accelerate computation. Normally, it should be on microseconds for model with states less than 100
         self.A = jit(self.Ajax)
         self.B = jit(self.Bjax)
         self.integrator = integrator
@@ -45,6 +47,8 @@ class LinearModel:
     def __init__(self, A,B):
         self.A = A
         self.B = B
+        self.u_dim = B.shape[1]
+        self.x_dim = A.shape[1]
     def forward(self,x,u):
         return self.A.dot(x) + self.B.dot(u)
 
