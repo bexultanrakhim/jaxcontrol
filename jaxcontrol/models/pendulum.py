@@ -9,6 +9,8 @@ class SingleLinkPendulum(Model):
         self.L = L
         self.g = g
         self.m = m
+        self.u_dim = 1
+        self.x_dim = 2
         super().__init__(integrator)
 
     def model(self, x, u):
