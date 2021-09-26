@@ -8,7 +8,7 @@ from jaxcontrol.controllers import iLQR
 import jax.numpy as jnp
 
 from matplotlib import pyplot as plt
-
+import time
 class CarModel(Model):
     def __init__(self, integrator):
         self.x_dim = 5
@@ -56,16 +56,18 @@ def final_cost(x):
     c_speed = (x[3] - v_target)**2
     return 2*c_circle + c_speed
 
-controller = iLQR(car, stage_cost, final_cost, 50, max_iter = 50)
+controller = iLQR(car, stage_cost, final_cost, 70, max_iter = 100)
 
 x0 = jnp.array([-3.0, 1.0, -0.2, 0.0, 0.0])
+p1 = time.time()
 x_trj, u_trj, cost_trace, reduction_ratio_trace, redu_trace, regu_trace = controller.solve(x0)
-
+p2 = time.time()
+print("Time: ", p2-p1)
 
 r = 2.0
 v_target = 2.00
 eps = 1e-6
-print(x_trj)
+
 plt.figure(figsize=(10,8))
 theta = jnp.linspace(0, 2*jnp.pi, 100)
 plt.plot(r*jnp.cos(theta), r*jnp.sin(theta), 'k--', lw=2)

@@ -106,6 +106,12 @@ class iLQR(Controller):
 
         self.__l_x_F = jit(grad(final_cost, argnums = 0))
         self.__l_xx_F = jit(jacfwd(self.__l_x_F, argnums = 0))
+        self.__stage_derivative = jit(self.__stage_derivative)
+        self.__final_derivative = jit(self.__final_derivative)
+        self.__V_term = jit(self.__V_term)
+        self.__Q_terms = jit(self.__Q_terms)
+        self.__gains = jit(self.__gains)
+        self.__trajectory_cost = jit(self.__trajectory_cost)
 
     def __stage_derivative(self, x, u,):
         l_x = self.__l_x(x, u)
@@ -190,13 +196,11 @@ class iLQR(Controller):
             v = [rand()*0.01 for _ in range(self.__model.u_dim)]
             u_trj.append(v)
         u_trj = jnp.array(u_trj)
-        print("u_trj",u_trj)
         x_trj = self.__rollout(x0, u_trj)
         total_cost = self.__trajectory_cost(x_trj, u_trj)
         max_regularization = 10000
         min_regularizatino = 0.001
 
-        print(total_cost)
         cost_trace = [total_cost]
         reduction_ratio_trace = [1]
         redu_trace = []
@@ -211,7 +215,6 @@ class iLQR(Controller):
 
             cost_reduction = cost_trace[-1] - total_cost
             reduction_ratio = cost_reduction / abs(expected_cost_redu)
-            print(expected_cost_redu)
             if cost_reduction > 0:
                 reduction_ratio_trace.append(reduction_ratio)
                 cost_trace.append(total_cost)

@@ -16,6 +16,7 @@ class Model(ABC):
         #accelerate computation. Normally, it should be on microseconds for model with states less than 100
         self.A = jit(self.Ajax)
         self.B = jit(self.Bjax)
+        self.forward = jit(self.forward)
         self.integrator = integrator
     @abstractmethod
     def model(self,x: Type[jnp.array],u: Type[jnp.array])-> Type[jnp.array]:
